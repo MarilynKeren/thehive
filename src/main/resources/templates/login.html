@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:session="http://www.thymeleaf.org/extras/session"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${session.selectedRole != null ? 
+                'Login as ' + session.selectedRole : 'Login'}">
+        Login - THE HIVE
+    </title>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .role-badge {
+            font-size: 0.8rem;
+            vertical-align: middle;
+        }
+        .password-toggle {
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+<body>
+    <section layout:fragment="content">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-5">
+                <div class="card shadow">
+                    <!-- Dynamic Card Header -->
+                    <div th:classappend="${session.selectedRole == 'ADMIN' ? 'bg-danger' : 'bg-primary'}" 
+                         class="card-header text-white">
+                        <h3 class="text-center mb-0">
+                            <i th:class="${session.selectedRole == 'ADMIN' ? 'fa fa-lock' : 
+                                         (session.selectedRole == 'OWNER' ? 'fa fa-home' : 'fa fa-user')}"></i>
+                            <span th:if="${session.selectedRole != null}">
+                                <span th:text="${session.selectedRole}"></span> Access
+                                <span class="badge role-badge bg-secondary ms-2">
+                                    <i class="fas fa-shield-alt"></i> Secured
+                                </span>
+                            </span>
+                            <span th:unless="${session.selectedRole != null}">
+                                User Login
+                            </span>
+                        </h3>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- Role-Specific Guidance -->
+                        <div th:if="${session.selectedRole != null}" class="alert alert-info py-2">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <span th:text="${session.selectedRole == 'ADMIN' ? 
+                                          'System administration dashboard access' :
+                                          'Property management tools'}"></span>
+                        </div>
+
+                        <!-- Error Messages -->
+                        <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span th:text="${session.loginError ?: 'Invalid username or password'}"></span>
+                        </div>
+                        <div th:if="${param.logout}" class="alert alert-success d-flex align-items-center">
+                            <i class="fas fa-check-circle me-2"></i>
+                            You've been successfully logged out
+                        </div>
+
+                        <!-- Login Form -->
+                        <form th:action="@{/login}" method="post" class="needs-validation" novalidate>
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                            <input type="hidden" 
+                                   th:if="${session.selectedRole != null}"
+                                   name="role" 
+                                   th:value="${session.selectedRole}">
+
+                            <div class="mb-3 position-relative">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user me-1"></i> Username
+                                </label>
+                                <input type="text" class="form-control" 
+                                       id="username" name="username" required
+                                       th:classappend="${param.error ? 'is-invalid' : ''}">
+                                <div class="invalid-feedback">
+                                    Please enter your username
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3 position-relative">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-key me-1"></i> Password
+                                </label>
+                                <input type="password" class="form-control" 
+                                       id="password" name="password" required
+                                       th:classappend="${param.error ? 'is-invalid' : ''}">
+                                <i class="password-toggle fas fa-eye" 
+                                   onclick="togglePassword()"></i>
+                                <div class="invalid-feedback">
+                                    Please enter your password
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mb-3">
+                                <button type="submit" class="btn btn-primary py-2">
+                                    <i class="fas fa-sign-in-alt me-2"></i>
+                                    <span th:text="${session.selectedRole != null ? 
+                                                  'Continue as ' + session.selectedRole : 'Sign In'}"></span>
+                                </button>
+                            </div>
+
+                            <div class="text-center small">
+                                <a th:href="@{/password-reset}" class="text-muted">
+                                    <i class="fas fa-question-circle"></i> Forgot password?
+                                </a>
+                            </div>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <!-- Role-Specific Footer -->
+                        <div th:switch="${session.selectedRole}" class="text-center">
+                            <div th:case="null">
+                                <p class="mb-2">New to THE HIVE?</p>
+                                <a th:href="@{/register}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-plus"></i> Create Guest Account
+                                </a>
+                            </div>
+                            <div th:case="OWNER">
+                                <p class="text-muted small">
+                                    <i class="fas fa-info-circle"></i> Owner accounts require verification
+                                </p>
+                            </div>
+                            <div th:case="ADMIN">
+                                <p class="text-danger small">
+                                    <i class="fas fa-shield-alt"></i> Restricted to authorized personnel
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Toggle password visibility
+            function togglePassword() {
+                const pwd = document.getElementById('password');
+                const icon = document.querySelector('.password-toggle');
+                if (pwd.type === 'password') {
+                    pwd.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    pwd.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            }
+
+            // Form validation
+            (() => {
+                'use strict';
+                const forms = document.querySelectorAll('.needs-validation');
+                Array.from(forms).forEach(form => {
+                    form.addEventListener('submit', event => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            })();
+        </script>
+    </section>
+</body>
+</html>

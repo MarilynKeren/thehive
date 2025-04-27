@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>THE HIVE - Choose Role</title>
+</head>
+<body>
+    <div class="container text-center mt-5">
+        <h1>Welcome to THE HIVE</h1>
+        <div class="row mt-4">
+            <!-- Guest Access (No Login) -->
+            <div class="col-md-4">
+                <a href="/select-role?role=GUEST" class="btn btn-primary btn-lg">Continue as Guest</a>
+                <p class="mt-2">Browse properties without an account</p>
+            </div>
+            
+            <!-- Owner Login -->
+            <div class="col-md-4">
+                <a href="/select-role?role=OWNER" class="btn btn-secondary btn-lg">Property Owner Login</a>
+            </div>
+            
+            <!-- Admin Login -->
+            <div class="col-md-4">
+                <a href="/select-role?role=ADMIN" class="btn btn-dark btn-lg">Admin Login</a>
+            </div>
+        </div>
+        
+        <!-- Show properties ONLY if logged in -->
+        <div th:if="${principal != null}" class="mt-5">
+            <h2>Featured Properties</h2>
+            <!-- ... (Existing property listing code) ... -->
+        </div>
+    </div>
+</body>
+</html>

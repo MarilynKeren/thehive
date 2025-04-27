@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title>Properties</title>
+</head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Properties</h1>
+        <form th:action="@{/properties/search}" method="get" class="d-flex">
+            <input type="text" name="location" placeholder="Search by location" class="form-control me-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4 mb-4" th:each="property : ${properties}">
+            <div class="card h-100">
+                <img th:src="${property.imageUrls != null && !property.imageUrls.isEmpty() ? property.imageUrls[0] : '/images/default-property.jpg'}" 
+                     class="card-img-top" alt="Property image">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${property.name}">Property Name</h5>
+                    <p class="card-text" th:text="${property.location}">Location</p>
+                    <p class="card-text" th:text="${property.type}">Type</p>
+                    <p class="card-text" th:text="'UGX ' + ${#numbers.formatDecimal(property.pricePerNight, 1, 2)} + ' per night'">Price</p>
+                    <a th:href="@{/properties/{id}(id=${property.id})}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

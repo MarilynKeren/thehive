@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Owner Dashboard</title>
+</head>
+<body>
+    <section layout:fragment="content">
+        <div th:if="${loginSuccess}" class="alert alert-success" th:text="${loginSuccess}"></div>
+        
+        <div class="row">
+            <!-- Properties Summary -->
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-home"></i> My Properties</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${properties.empty}" class="text-center py-4">
+                            <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
+                            <p>You haven't listed any properties yet</p>
+                            <a href="/properties/add" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Property
+                            </a>
+                        </div>
+                        <div th:each="property : ${properties}" class="mb-3">
+                            <h6 th:text="${property.name}"></h6>
+                            <p class="text-muted" th:text="${property.location}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bookings Summary -->
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-calendar-check"></i> Recent Bookings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${bookings.empty}" class="text-center py-4">
+                            <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
+                            <p>No bookings yet</p>
+                        </div>
+                        <div th:each="booking : ${bookings}" class="mb-3">
+                            <h6 th:text="${booking.guestName}"></h6>
+                            <span th:text="${#dates.format(booking.checkInDate)}"></span> - 
+                            <span th:text="${#dates.format(booking.checkOutDate)}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::section})}">
+<head>
+    <title th:text="${property.name}">Property</title>
+</head>
+<body>
+<section>
+    <div class="row">
+        <div class="col-md-8">
+            <div id="propertyCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div th:each="image, iter : ${property.imageUrls}" 
+                         th:class="${iter.index == 0} ? 'carousel-item active' : 'carousel-item'">
+                        <img th:src="${image}" class="d-block w-100" alt="Property image">
+                    </div>
+                    <div th:if="${property.imageUrls == null || property.imageUrls.isEmpty()}" class="carousel-item active">
+                        <img src="/images/default-property.jpg" class="d-block w-100" alt="Default property image">
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+            
+            <h1 th:text="${property.name}">Property Name</h1>
+            <p class="lead" th:text="${property.location}">Location</p>
+            <p th:text="${property.description}">Description</p>
+            
+            <h3>Amenities</h3>
+            <ul th:if="${property.amenities != null && !property.amenities.isEmpty()}">
+                <li th:each="amenity : ${property.amenities}" th:text="${amenity}">Amenity</li>
+            </ul>
+            <p th:if="${property.amenities == null || property.amenities.isEmpty()}">No amenities listed</p>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title" th:text="'UGX ' + ${#numbers.formatDecimal(property.pricePerNight, 1, 2)} + ' per night'">Price</h3>
+                    
+                    <form th:action="@{/bookings}" method="post" th:if="${property.ownerId != (principal != null ? principal.name : '')}">
+                        <input type="hidden" name="propertyId" th:value="${property.id}">
+                        
+                        <div class="mb-3">
+                            <label for="checkInDate" class="form-label">Check-in Date</label>
+                            <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="checkOutDate" class="form-label">Check-out Date</label>
+                            <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="numberOfGuests" class="form-label">Number of Guests</label>
+                            <input type="number" class="form-control" id="numberOfGuests" name="numberOfGuests" 
+                                   min="1" th:attr="max=${property.capacity}" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Book Now</button>
+                    </form>
+                    
+                    <div th:if="${property.ownerId == (principal != null ? principal.name : '')}">
+                        <a th:href="@{/properties/{id}/edit(id=${property.id})}" class="btn btn-primary w-100 mb-2">Edit Property</a>
+                        <form th:action="@{/properties/{id}/delete(id=${property.id})}" method="post">
+                            <button type="submit" class="btn btn-danger w-100">Delete Property</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h4 class="card-title">Contact Owner</h4>
+                    <form th:action="@{/messages}" method="post" th:if="${principal != null && property.ownerId != principal.name}">
+                        <input type="hidden" name="propertyId" th:value="${property.id}">
+                        <input type="hidden" name="receiverId" th:value="${property.ownerId}">
+                        
+                        <div class="mb-3">
+                            <label for="messageContent" class="form-label">Message</label>
+                            <textarea class="form-control" id="messageContent" name="content" rows="3" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Send Message</button>
+                    </form>
+                    
+                    <div th:if="${principal == null}">
+                        <p>Please <a href="/login">login</a> to contact the owner.</p>
+                    </div>
+                    
+                    <div th:if="${principal != null && property.ownerId == principal.name}">
+                        <p>This is your property.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
